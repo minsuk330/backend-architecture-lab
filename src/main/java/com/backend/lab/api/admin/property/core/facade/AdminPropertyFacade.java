@@ -1,5 +1,6 @@
 package com.backend.lab.api.admin.property.core.facade;
 
+import com.backend.lab.api.admin.property.core.usecase.CreatePropertyUseCase;
 import com.backend.lab.domain.propertyAdvertisement.service.PropertyAdvertisementService;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyAddressReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
@@ -184,8 +185,6 @@ public class AdminPropertyFacade {
   private final PnuTableService pnuTableService;
   private final PropertyMemberService propertyMemberService;
   private final MemberNoteService memberNoteService;
-  private final NotificationService notificationService;
-  private final PropertyRequestService propertyRequestService;
   private final CustomerService customerService;
   private final PriceInfoRepository priceInfoRepository;
   private final LedgeInfoRepository ledgeInfoRepository;
@@ -201,6 +200,7 @@ public class AdminPropertyFacade {
   private final PropertyAdvertisementService propertyAdvertisementService;
   private final TaskNoteRepository taskNoteRepository;
   private final PropertyWorkLogService propertyWorkLogService;
+  private final CreatePropertyUseCase createPropertyUseCase;
 
   @Transactional
   public PropertyPublicResp updatePublicStatus(Long propertyId) {
@@ -210,69 +210,8 @@ public class AdminPropertyFacade {
         .build();
   }
 
-
-  //매물 create
-  @Transactional
   public void createProperty(PropertyCreateReq req, Long adminId, String clientIp) {
-
-    Admin admin = adminService.getById(adminId);
-
-    //info 데이터 생성
-    Property property = mapToProperty(req);
-
-    Property savedProperty = propertyService.create(property);
-
-    //관련 데이터 생성
-    createRelatedData(req, savedProperty, admin, clientIp);
-    createInfoList(req.getLands(), req.getLedges(), req.getFloors(), savedProperty.getId());
-
-    //매물작업이력생성
-    propertyChangeDetectService.PropertyCreateWorkLog(req, savedProperty, admin, clientIp);
-    List<Member> agents = memberService.getsAgent();
-    agents.forEach(
-        agent -> notificationService.createByProperty(agent.getId(), property.getId(),
-            property.getBuildingName(),
-            NotificationType.REGISTER));
-
-  }
-
-  //관련 데이터 생성
-  //todo 마지막에 바꾸자
-  private void createRelatedData(PropertyCreateReq req, Property property, Admin admin,
-      String clientIp) {
-    // 업무일지
-    if (req.getTaskNote() != null) {
-      taskNoteService.createByProperty(req.getTaskNote(), property, admin);
-    }
-
-    // 비밀메모
-    if (req.getSecret() != null) {
-      secretService.create(req.getSecret(), property, admin);
-    }
-
-    // 상세정보
-    if (req.getDetail() != null) {
-      if (req.getDetail().getPropertyImageIds() != null) {
-        List<UploadFile> propertyImages = uploadFileService.getByIds(
-            req.getDetail().getPropertyImageIds()
-        );
-        req.getDetail().setPropertyImages(propertyImages);
-      }
-      if (req.getDetail().getDataImageIds() != null) {
-        List<UploadFile> dataImages = uploadFileService.getByIds(
-            req.getDetail().getDataImageIds()
-        );
-        req.getDetail().setDataImages(dataImages);
-      }
-      detailsService.create(req.getDetail(), property);
-    }
-    else if (req.getDetail()==null) {
-      detailsService.create(new DetailReq(), property);
-    }
-
-    adminPropertyMemberFacade.createPropertyMember(req.getMembers(), property.getId(),
-        admin.getId(), clientIp);
-
+    createPropertyUseCase.execute(req, adminId, clientIp);
   }
 
 
