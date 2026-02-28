@@ -1,0 +1,10 @@
+spring:
+  config:
+    import:
+      - optional:file:env/mail.env[.properties]
+
+  mail:
+    host: ${MAIL_HOST}
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}

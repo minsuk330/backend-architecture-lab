@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NICE AUTH</title>
+</head>
+<body>
+<form name="form" id="form" action="https://nice.checkplus.co.kr/CheckPlusSafeModel/service.cb" method="post">
+    <input type="hidden" id="m" name="m" value="service" />
+    <input type="hidden" id="token_version_id" name="token_version_id" th:value="${niceAuthFormData.tokenVersionId}" />
+    <input type="hidden" id="enc_data" name="enc_data" th:value="${niceAuthFormData.encData}" />
+    <input type="hidden" id="integrity_value" name="integrity_value" th:value="${niceAuthFormData.integrityValue}" />
+</form>
+
+<script>
+    // 팝업 창 열기
+    document.getElementById('form').submit();
+</script>
+</body>
+</html>

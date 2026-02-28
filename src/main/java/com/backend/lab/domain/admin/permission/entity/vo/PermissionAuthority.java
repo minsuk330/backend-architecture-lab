@@ -1,0 +1,29 @@
+package com.backend.lab.domain.admin.permission.entity.vo;
+
+public enum PermissionAuthority {
+
+  MANAGE_MAEMOOL,
+  SECRET_MEMO_EXPOSE_ME,
+  SECRET_MEMO_EXPOSE_DEPARTMENT,
+  SECRET_MEMO_EXPOSE_ALL,
+
+  MANAGE_INTEREST_GROUP,
+
+  MANAGER_REGISTER_STATE, // ok
+
+  MANAGE_CUSTOMER, // api 만들어야함
+
+  MANAGE_NOTICE, // ok
+  MANAGE_EVENT, // ok
+  MANAGE_POPUP, // ok
+  MANAGE_TODAY_NEWS, // ok
+
+  MANAGE_CATEGORY, // ok
+  MANAGE_PRINT, // ok
+  MANAGE_MARKETING_THUMBNAIL, // ok
+  MANAGE_MARKETING_SLOGAN, // ok
+
+  MANAGE_TASK_AND_CUSTOMER_HISTORY, // ok
+  MANAGE_PURCHASE_HISTORY, // ok
+  MANAGE_USAGE_HISTORY
+}

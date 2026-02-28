@@ -1,0 +1,11 @@
+spring:
+  config:
+    import:
+      - optional:file:env/nice.env[.properties]
+
+nice:
+  client-id: ${NICE_CLIENT_ID}
+  client-secret: ${NICE_CLIENT_SECRET}
+  product-id: ${NICE_PRODUCT_ID}
+  access-token: ${NICE_ACCESS_TOKEN}
+  callback-url: ${NICE_CALLBACK_URL}

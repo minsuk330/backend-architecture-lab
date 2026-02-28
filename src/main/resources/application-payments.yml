@@ -1,0 +1,16 @@
+spring:
+  config:
+    import:
+      - optional:file:env/payment.env[.properties]
+
+nice-payment:
+  credit-mid: ${NICEPAY_CREDIT_MID}
+  naver-mid: ${NICEPAY_NAVER_MID}
+  kakao-mid: ${NICEPAY_KAKAO_MID}
+  credit-merchant-key: ${NICEPAY_CREDIT_MERCHANT_KEY}
+  naver-merchant-key: ${NICEPAY_NAVER_MERCHANT_KEY}
+  kakao-merchant-key: ${NICEPAY_KAKAO_MERCHANT_KEY}
+  callback-url: ${NICEPAY_CALLBACK_URL}
+  credit-callbackurl: ${NICEPAY_CREDIT_CALLBACK_URL}
+  naver-callbackurl: ${NICEPAY_NAVER_CALLBACK_URL}
+  kakao-callbackurl: ${NICEPAY_KAKAO_CALLBACK_URL}

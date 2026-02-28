@@ -1,0 +1,48 @@
+package com.backend.lab.domain.member.core.entity.embedded;
+
+import com.backend.lab.domain.member.core.entity.vo.CompanyType;
+import com.backend.lab.common.entity.vo.GenderType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Embeddable
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SellerProperties {
+
+  @Column(name = "seller_name")
+  private String name;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "seller_company_type")
+  private CompanyType companyType; // 개인 / 법인
+  @Column(name = "seller_phone_number")
+  private String phoneNumber;
+
+  @Column(name ="seller_address")
+  private String address; // 주소
+  @Column(name = "seller_address_detail")
+  private String addressDetail;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "seller_gender")
+  private GenderType gender;
+
+  @Column(name = "seller_birth")
+  private LocalDate birth; // 생년월일
+  //담당자 추가
+  @Column(name = "seller_manager_id")
+  private Long adminId;
+
+
+}

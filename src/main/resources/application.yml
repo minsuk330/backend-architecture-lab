@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  tomcat:
+    connection-timeout: 60000  # 60초
+    keep-alive-timeout: 60000  # 60초
+
+spring:
+  mvc:
+    async:
+      request-timeout: 300000  # 5분 (비동기 요청)
+  config:
+    import:
+      - classpath:application-db.yml
+      - classpath:application-security.yml
+      - classpath:application-mail.yml
+      - classpath:application-api.yml
+      - classpath:application-aws.yml
+      - classpath:application-oauth.yml
+      - classpath:application-nice.yml
+      - classpath:application-payments.yml
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: method
+    path: /swagger-ui.html

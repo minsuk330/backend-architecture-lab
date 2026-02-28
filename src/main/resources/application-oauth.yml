@@ -1,0 +1,25 @@
+spring:
+  config:
+    import:
+      - optional:file:env/oauth.env[.properties]
+
+oauth:
+  naver:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_CLIENT_SECRET}
+    callback-url: ${NAVER_CALLBACK_URL}
+    authorization-url: ${NAVER_AUTHORIZATION_URL:https://nid.naver.com/oauth2.0/authorize}
+
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    callback-url: ${KAKAO_CALLBACK_URL}
+    authorization-url: ${KAKAO_AUTHORIZATION_URL:https://kauth.kakao.com/oauth/authorize}
+
+  apple:
+    key-id: ${APPLE_KEY_ID}
+    client-id: ${APPLE_CLIENT_ID}
+    team-id: ${APPLE_TEAM_ID}
+    callback-url: ${APPLE_CALLBACK_URL}
+    key-path: ${APPLE_KEY_PATH}
+    authorization-url: ${APPLE_AUTHORIZATION_URL:https://appleid.apple.com/auth/authorize}
