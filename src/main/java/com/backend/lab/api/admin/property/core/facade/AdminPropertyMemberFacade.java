@@ -1,6 +1,7 @@
 package com.backend.lab.api.admin.property.core.facade;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCustomerCreateReq;
+import com.backend.lab.api.admin.property.core.facade.strategy.PropertyMemberStrategy;
 import com.backend.lab.domain.admin.core.entity.Admin;
 import com.backend.lab.domain.admin.core.service.AdminService;
 import com.backend.lab.domain.member.core.entity.Member;
@@ -32,35 +33,23 @@ public class AdminPropertyMemberFacade {
   private final CustomerService customerService;
   private final MemberChangeDetectService memberChangeDetectService;
   private final AdminService adminService;
+  /// 여기서 list로 받는 이유는 propertyMemberStrategy의 구현체들을 전부 주입받기 위해서 맞아?
+  private final List<PropertyMemberStrategy> strategies;
 
   @Transactional
-  public void createPropertyMember(List<PropertyCustomerCreateReq> members, Long propertyId, Long adminId,String clientIp) {
-    Admin admin = adminService.getById(adminId);
-    if (members!=null) {
-      members.forEach(member-> {
-        //이거 id값으로 바꿔주기
-        if(member.getIsNew()) {
-          Member customer = customerService.createCustomer(member,adminId);
-          propertyMemberService.create(customer.getId(), propertyId);
-          AdminCustomerDTO adminCustomerDTO = createAdminCustomerDTO(member, adminId);
-
-          memberChangeDetectService.memberCreateWorkLog(adminCustomerDTO,admin,customer,clientIp);
-        }
-        else {
-          //처음 매물 생성 시 기존에 존재하던 맴버 ->매도자 고객 둘 다 가능함
-          //근데 이때 수정하는 정보는 customerProperties이다.
-          Member originalCustomer = memberService.getById(member.getMemberId());
-
-          propertyMemberService.create(member.getMemberId(), propertyId);
-
-          AdminCustomerDTO adminCustomerDTO = createAdminCustomerDTO(member, adminId);
-
-          //customer가 이미 업데이트 된게 들어와서 변경감지가 안일어남 그럼? 업데이트 전을 미리 조회하면 되겠다
-          memberChangeDetectService.memberUpdateWorkLog(adminCustomerDTO,admin,originalCustomer,clientIp);
-          customerService.updateSellerAndCustomer(member, member.getMemberId());
-        }
-      });
+  public void createPropertyMember(List<PropertyCustomerCreateReq> members, Long propertyId, Long adminId, String clientIp) {
+    if (members == null) {
+      return;
     }
+    Admin admin = adminService.getById(adminId);
+
+    members.forEach(member -> {
+      PropertyMemberStrategy strategy = strategies.stream()
+          .filter(s -> s.supports(member))
+          .findFirst()
+          .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 멤버 타입입니다."));
+      strategy.handle(member, propertyId, admin, clientIp);
+    });
   }
 
   //고객이 없으면 그냥 추가하면 되는데 고객이 있는데 그 정보를 수정하면 업데이트 해줘야 함
