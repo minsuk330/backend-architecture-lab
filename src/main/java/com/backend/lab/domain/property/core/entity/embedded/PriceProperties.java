@@ -3,6 +3,7 @@ package com.backend.lab.domain.property.core.entity.embedded;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -97,6 +98,31 @@ public class PriceProperties {
       this.loanDescription = other.getLoanDescription();
     }
     return this;
+  }
+
+  public Long calculateYeonPyongPrice(List<LedgerProperties> ledgers) {
+    // null 체크
+    if (this.getMmPrice() == null || ledgers == null || ledgers.isEmpty() || this.getPyeongPrice() == null) {
+      return null;
+    }
+
+    Double totalLandAreaPyeong = ledgers.stream()
+        .filter(ledger -> ledger.getLandAreaPyeong() != null)
+        .mapToDouble(LedgerProperties::getLandAreaPyeong)
+        .sum();
+
+    Double totalYeonAreaPyeong = ledgers.stream()
+        .filter(ledger -> ledger.getYeonAreaPyeong() != null)
+        .mapToDouble(LedgerProperties::getYeonAreaPyeong)
+        .sum();
+
+    if (totalLandAreaPyeong <= 0 || totalYeonAreaPyeong <= 0) {
+      return null;
+    }
+
+    double calculatedPrice = totalLandAreaPyeong * this.getPyeongPrice();
+
+    return Math.round(calculatedPrice / totalYeonAreaPyeong);
   }
 
 }

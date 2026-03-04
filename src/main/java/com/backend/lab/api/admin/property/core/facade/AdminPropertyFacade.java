@@ -1,6 +1,7 @@
 package com.backend.lab.api.admin.property.core.facade;
 
 import com.backend.lab.api.admin.property.core.usecase.CreatePropertyUseCase;
+import com.backend.lab.api.admin.property.core.usecase.UpdatePropertyUseCase;
 import com.backend.lab.domain.propertyAdvertisement.service.PropertyAdvertisementService;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyAddressReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
@@ -158,9 +159,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminPropertyFacade {
 
   private final RegisterInfoRepository registerInfoRepository;
-
-  private final AdminPropertyMemberFacade adminPropertyMemberFacade;
-  private final FloorFacade floorFacade;
   private final TemplateFacade templateFacade;
 
   private final PropertyService propertyService;
@@ -168,13 +166,9 @@ public class AdminPropertyFacade {
   private final AdminService adminService;
   private final DetailsService detailsService;
   private final TaskNoteService taskNoteService;
-  private final FloorInfoService floorInfoService;
-  private final PropertyChangeDetectService propertyChangeDetectService;
   private final UploadFileService uploadFileService;
 
   private final AddressInfoService addressInfoService;
-  private final LandInfoService landInfoService;
-  private final LedgeInfoService ledgeInfoService;
   private final PriceInfoService priceInfoService;
   private final RegisterInfoService registerInfoService;
   private final CategoryService categoryService;
@@ -201,8 +195,9 @@ public class AdminPropertyFacade {
   private final TaskNoteRepository taskNoteRepository;
   private final PropertyWorkLogService propertyWorkLogService;
   private final CreatePropertyUseCase createPropertyUseCase;
+  private final UpdatePropertyUseCase updatePropertyUseCase;
 
-  @Transactional
+  @Transactionalㅇ
   public PropertyPublicResp updatePublicStatus(Long propertyId) {
     Boolean currentStatus = propertyService.togglePublic(propertyId);
     return PropertyPublicResp.builder()
@@ -214,31 +209,9 @@ public class AdminPropertyFacade {
     createPropertyUseCase.execute(req, adminId, clientIp);
   }
 
-
-  @Transactional
   public void updateProperty(PropertyUpdateReq req, Long adminId, Long propertyId,
       String clientIp) {
-    Admin admin = adminService.getById(adminId);
-    Property property = propertyService.getById(propertyId);
-    Category bigCateogry = categoryService.getById(req.getDefaults().getBigCategoryId());
-    Set<Category> smallCategories = req.getDefaults().getSmallCategoryIds() != null ? 
-        req.getDefaults().getSmallCategoryIds().stream()
-            .map(categoryService::getById)
-            .collect(Collectors.toSet()) : new LinkedHashSet<>();
-
-    propertyChangeDetectService.PropertyUpdateWorkLog(req, property, admin, clientIp);
-
-    createAutoTaskNote(req, property, admin);
-    updateInformation(req, property);
-    updateRelateDate(req, property, admin, clientIp);
-    updateInfoList(req, propertyId);
-
-    Long thumbnailId = req.getDefaults().getThumbnailId();
-    if (thumbnailId != null) {
-      UploadFile thumbnail = uploadFileService.getById(thumbnailId);
-      req.getDefaults().setThumbnailImageUrl(thumbnail);
-    }
-    propertyService.update(propertyId, req, bigCateogry, smallCategories);
+    updatePropertyUseCase.execute(req, adminId, propertyId, clientIp);
 
   }
 
@@ -411,209 +384,6 @@ public class AdminPropertyFacade {
     propertyAdvertisementService.removeAdvertisement(propertyId, agentId);
   }
 
-  @Transactional
-  public void createInfoList(List<LandProperties> lands, List<LedgerProperties> ledges,
-      List<PropertyFloorReq> floors, Long propertyId) {
-    Property property = propertyService.getById(propertyId);
-
-    Set<FloorInformation> allFloorInfos = new LinkedHashSet<>();
-
-    if (ledges == null) {
-      ledges = new ArrayList<>();
-    }
-    if (lands == null) {
-      lands = new ArrayList<>();
-    }
-    if (floors == null) {
-      floors = new ArrayList<>();
-    }
-
-    int maxSize = Math.max(Math.max(ledges.size(), lands.size()), floors.size());
-
-    if (maxSize == 0) {
-      return;
-    }
-    //한 건물에 여러개 토지 가능, 한 토지에 여러개 건물도 가능
-    //토지는 그냥 리스트로 뿌려주고 건물이랑 층만 잘 buildingOrder매겨서 넣어주면 될
-    for (int i = 0; i < maxSize; i++) {
-      Long buildingOrder = (long) i + 1;
-
-      if (i < ledges.size()) {
-        LedgeInformation ledgeInformation = ledgeInfoService.create(LedgeInformation.builder()
-            .properties(ledges.get(i))
-            .buildingOrder(buildingOrder)
-            .build());
-        property.getLedge().add(ledgeInformation);
-      }
-      if (i < lands.size()) {
-        LandInformation landInformation = landInfoService.create(LandInformation.builder()
-            .properties(lands.get(i))
-            .buildingOrder(buildingOrder)
-            .build());
-        property.getLand().add(landInformation);
-      }
-      if (i < floors.size()) {
-        //각 빌딩마다 수행한다.
-        PropertyFloorReq propertyFloorReq = floors.get(i); //req에서 set꺼내서 하나씩 비교함
-        if (propertyFloorReq != null && !propertyFloorReq.getFloor().isEmpty()) {
-          Set<FloorInformation> floorInformations = floorFacade.floorsAssignRank(
-              propertyFloorReq.getFloor(),//층 하나들어감
-              propertyFloorReq.getIsPublic(),
-              buildingOrder);
-          allFloorInfos.addAll(floorInformations);
-        }
-      }
-    }
-    property.setFloors(allFloorInfos);
-  }
-
-  @Transactional
-  public void updateInfoList(PropertyUpdateReq req, Long propertyId) {
-    Property property = propertyService.getById(propertyId);
-
-    // 기존 정보 모두 삭제
-    deleteInfoList(property);
-
-    // 새로운 정보 생성 (create 로직 재사용)
-    createInfoList(req.getLands(), req.getLedges(), req.getFloors(), propertyId);
-
-  }
-
-
-  private void updateRelateDate(PropertyUpdateReq req, Property property, Admin admin,
-      String clientIp) {
-    //업무일지
-    if (req.getTaskNote() != null) {
-      taskNoteService.updateByProperty(req.getTaskNote(), property, admin);
-    }
-
-    // 비밀메모
-    if (req.getSecret() != null) {
-      secretService.create(req.getSecret(), property, admin);
-    }
-    // 상세정보
-    if (req.getDetail() != null) {
-      // 이미지 처리를 공통으로 먼저 수행
-      if (req.getDetail().getPropertyImageIds() != null) {
-        List<UploadFile> propertyImages = uploadFileService.getByIds(
-            req.getDetail().getPropertyImageIds()
-        );
-        req.getDetail().setPropertyImages(propertyImages);
-      }
-      if (req.getDetail().getDataImageIds() != null) {
-        List<UploadFile> dataImages = uploadFileService.getByIds(
-            req.getDetail().getDataImageIds()
-        );
-        req.getDetail().setDataImages(dataImages);
-      }
-
-      // 기존 상세정보 존재 여부 확인
-      if (detailsService.getByPropertyId(property.getId()) != null) {
-        detailsService.update(req.getDetail(), property);
-      } else {
-        detailsService.create(req.getDetail(), property);
-      }
-    }
-    if (req.getMembers() != null) {
-      adminPropertyMemberFacade.updatePropertyMember(req.getMembers(), property.getId(),
-          admin.getId(), clientIp);
-    }
-  }
-
-  private void createAutoTaskNote(PropertyUpdateReq req, Property property, Admin admin) {
-    //각 감지마다 생성해야 함
-    List<String> members = propertyChangeDetectService.detectPhoneNumber(req, admin, property);
-    if (members != null) {
-      createTaskNote(members, property, admin, LogFieldType.PHONE_NUMBER);
-    }
-    List<String> admins = propertyChangeDetectService.detectAdmin(req, property);
-    if (admins != null) {
-      createTaskNote(admins, property, admin, LogFieldType.PHONE_NUMBER);
-    }
-    List<String> mmPrice = propertyChangeDetectService.detectMMPrice(req, property);
-    if (mmPrice != null) {
-      createTaskNote(mmPrice, property, admin, LogFieldType.MM_PRICE);
-    }
-    List<String> pyengPrice = propertyChangeDetectService.detectPyengPrice(req, property);
-    if (pyengPrice != null) {
-      createTaskNote(pyengPrice, property, admin, LogFieldType.PYENG_PRICE);
-    }
-    List<String> status = propertyChangeDetectService.detectStatus(req, property);
-    if (status != null) {
-      createTaskNote(status, property, admin, LogFieldType.STATUS);
-    }
-    List<String> roi = propertyChangeDetectService.detectRoi(req, property);
-    if (roi != null) {
-      createTaskNote(roi, property, admin, LogFieldType.ROI);
-    }
-    List<String> depositPrice = propertyChangeDetectService.detectDepositPrice(req, property);
-    if (depositPrice != null) {
-      createTaskNote(depositPrice, property, admin, LogFieldType.DEPOSIT_PRICE);
-    }
-    List<String> monthPrice = propertyChangeDetectService.detectMonthPrice(req, property);
-    if (monthPrice != null) {
-      createTaskNote(monthPrice, property, admin, LogFieldType.MONTH_PRICE);
-    }
-
-  }
-
-  private void createTaskNote(List<String> changes, Property property, Admin admin,
-      LogFieldType logFieldType) {
-    String before = changes.get(0);
-    String after = changes.get(1);
-    taskNoteService.save(before, after, property, admin, logFieldType);
-  }
-
-
-  private void updateInformation(PropertyUpdateReq req, Property property) {
-
-    if (req.getAddress() != null) {
-      addressInfoService.update(req.getAddress(), property.getAddress().getId());
-    }
-
-    Long yeonPyongPrice = calculateYeonPyongPrice(req.getPrice(), req.getLedges());
-
-    if (req.getPrice() != null) {
-      priceInfoService.update(req.getPrice(), property.getPrice().getId(), yeonPyongPrice,req.getLands());
-    }
-
-    registerInfoService.update(req.getRegister() != null ? req.getRegister() : new RegisterProperties(), property.getRegister().getId());
-
-    templateFacade.updateTemplateInformation(
-        req.getTemplate() != null ? req.getTemplate() : new PropertyTemplateReq(),
-        property.getTemplate().getId()
-    );
-
-  }
-
-  private void deleteInfoList(Property property) {
-    // Floor 삭제
-    if (property.getFloors() != null && !property.getFloors().isEmpty()) {
-      Set<Long> floorIds = property.getFloors().stream()
-          .map(FloorInformation::getId)
-          .collect(Collectors.toSet());
-      property.getFloors().clear();
-      floorIds.forEach(floorInfoService::deleteSingleFloor);
-    }
-
-    // Ledge 삭제
-    if (property.getLedge() != null && !property.getLedge().isEmpty()) {
-      List<Long> ledgeIds = property.getLedge().stream()
-          .map(LedgeInformation::getId)
-          .toList();
-      property.getLedge().clear();
-      ledgeIds.forEach(ledgeInfoService::delete);
-    }
-
-    // Land 삭제
-    if (property.getLand() != null && !property.getLand().isEmpty()) {
-      List<Long> landIds = property.getLand().stream()
-          .map(LandInformation::getId)
-          .toList();
-      property.getLand().clear();
-      landIds.forEach(landInfoService::delete);
-    }
-  }
 
   @Transactional
   public Property mapToProperty(PropertyCreateReq req) {
@@ -2109,35 +1879,6 @@ public class AdminPropertyFacade {
 
   private String getMultipleLineStr(Supplier<Object> supplier) {
     return this.getValSafely(supplier) + "\n";
-  }
-
-  private Long calculateYeonPyongPrice(PriceProperties price, List<LedgerProperties> ledgers) {
-    // null 체크
-    if (price == null ||
-        price.getMmPrice() == null ||
-        ledgers == null ||
-        ledgers.isEmpty() ||
-        price.getPyeongPrice() == null) {
-      return null;
-    }
-
-    Double totalLandAreaPyeong = ledgers.stream()
-        .filter(ledger -> ledger.getLandAreaPyeong() != null)
-        .mapToDouble(LedgerProperties::getLandAreaPyeong)
-        .sum();
-
-    Double totalYeonAreaPyeong = ledgers.stream()
-        .filter(ledger -> ledger.getYeonAreaPyeong() != null)
-        .mapToDouble(LedgerProperties::getYeonAreaPyeong)
-        .sum();
-
-    if (totalLandAreaPyeong <= 0 || totalYeonAreaPyeong <= 0) {
-      return null;
-    }
-
-    double calculatedPrice = totalLandAreaPyeong * price.getPyeongPrice();
-
-    return Math.round(calculatedPrice / totalYeonAreaPyeong);
   }
 
 

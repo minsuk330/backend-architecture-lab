@@ -33,7 +33,6 @@ public class AdminPropertyMemberFacade {
   private final CustomerService customerService;
   private final MemberChangeDetectService memberChangeDetectService;
   private final AdminService adminService;
-  /// 여기서 list로 받는 이유는 propertyMemberStrategy의 구현체들을 전부 주입받기 위해서 맞아?
   private final List<PropertyMemberStrategy> strategies;
 
   @Transactional

@@ -193,7 +193,7 @@ public class CreatePropertyUseCase {
     AddressInformation addressInformation = addressInfoService.create(
         req.getAddress() != null ? req.getAddress() : new PropertyAddressReq());
 
-    Long yeonPyongPrice = calculateYeonPyongPrice(req.getPrice(), req.getLedges());
+    Long yeonPyongPrice = req.getPrice().calculateYeonPyongPrice(req.getLedges());
 
     PriceInformation priceInformation = priceInfoService.create(
         req.getPrice() != null ? req.getPrice() : new PriceProperties(), yeonPyongPrice, req.getLands());
@@ -234,36 +234,4 @@ public class CreatePropertyUseCase {
         .exclusiveAgentId(exclusiveId)
         .build();
   }
-
-  private Long calculateYeonPyongPrice(PriceProperties price, List<LedgerProperties> ledgers) {
-    // null 체크
-    if (price == null ||
-        price.getMmPrice() == null ||
-        ledgers == null ||
-        ledgers.isEmpty() ||
-        price.getPyeongPrice() == null) {
-      return null;
-    }
-
-    Double totalLandAreaPyeong = ledgers.stream()
-        .filter(ledger -> ledger.getLandAreaPyeong() != null)
-        .mapToDouble(LedgerProperties::getLandAreaPyeong)
-        .sum();
-
-    Double totalYeonAreaPyeong = ledgers.stream()
-        .filter(ledger -> ledger.getYeonAreaPyeong() != null)
-        .mapToDouble(LedgerProperties::getYeonAreaPyeong)
-        .sum();
-
-    if (totalLandAreaPyeong <= 0 || totalYeonAreaPyeong <= 0) {
-      return null;
-    }
-
-    double calculatedPrice = totalLandAreaPyeong * price.getPyeongPrice();
-
-    return Math.round(calculatedPrice / totalYeonAreaPyeong);
-  }
-
-
-
 }
