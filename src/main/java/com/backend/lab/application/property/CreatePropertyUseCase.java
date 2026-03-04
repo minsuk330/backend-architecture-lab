@@ -1,4 +1,4 @@
-package com.backend.lab.api.admin.property.core.usecase;
+package com.backend.lab.application.property;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyAddressReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;

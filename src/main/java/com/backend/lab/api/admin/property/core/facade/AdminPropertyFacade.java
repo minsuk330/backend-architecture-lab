@@ -1,7 +1,7 @@
 package com.backend.lab.api.admin.property.core.facade;
 
-import com.backend.lab.api.admin.property.core.usecase.CreatePropertyUseCase;
-import com.backend.lab.api.admin.property.core.usecase.UpdatePropertyUseCase;
+import com.backend.lab.application.property.CreatePropertyUseCase;
+import com.backend.lab.application.property.UpdatePropertyUseCase;
 import com.backend.lab.domain.propertyAdvertisement.service.PropertyAdvertisementService;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyAddressReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
@@ -88,12 +88,6 @@ import com.backend.lab.domain.property.core.repository.info.PriceInfoRepository;
 import com.backend.lab.domain.property.core.repository.info.RegisterInfoRepository;
 import com.backend.lab.domain.property.core.repository.info.TemplateInfoRepository;
 import com.backend.lab.domain.property.core.service.PropertyService;
-import com.backend.lab.domain.property.core.service.info.AddressInfoService;
-import com.backend.lab.domain.property.core.service.info.FloorInfoService;
-import com.backend.lab.domain.property.core.service.info.LandInfoService;
-import com.backend.lab.domain.property.core.service.info.LedgeInfoService;
-import com.backend.lab.domain.property.core.service.info.PriceInfoService;
-import com.backend.lab.domain.property.core.service.info.RegisterInfoService;
 import com.backend.lab.domain.property.pnuTable.entity.PnuTable;
 import com.backend.lab.domain.property.pnuTable.entity.vo.PnuTableType;
 import com.backend.lab.domain.property.pnuTable.service.PnuTableService;
@@ -159,7 +153,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminPropertyFacade {
 
   private final RegisterInfoRepository registerInfoRepository;
-  private final TemplateFacade templateFacade;
 
   private final PropertyService propertyService;
   private final SecretService secretService;
@@ -167,10 +160,6 @@ public class AdminPropertyFacade {
   private final DetailsService detailsService;
   private final TaskNoteService taskNoteService;
   private final UploadFileService uploadFileService;
-
-  private final AddressInfoService addressInfoService;
-  private final PriceInfoService priceInfoService;
-  private final RegisterInfoService registerInfoService;
   private final CategoryService categoryService;
 
   private final PropertyMapper propertyMapper;
@@ -197,7 +186,7 @@ public class AdminPropertyFacade {
   private final CreatePropertyUseCase createPropertyUseCase;
   private final UpdatePropertyUseCase updatePropertyUseCase;
 
-  @Transactionalㅇ
+  @Transactional
   public PropertyPublicResp updatePublicStatus(Long propertyId) {
     Boolean currentStatus = propertyService.togglePublic(propertyId);
     return PropertyPublicResp.builder()
@@ -384,55 +373,6 @@ public class AdminPropertyFacade {
     propertyAdvertisementService.removeAdvertisement(propertyId, agentId);
   }
 
-
-  @Transactional
-  public Property mapToProperty(PropertyCreateReq req) {
-
-    AddressInformation addressInformation = addressInfoService.create(
-        req.getAddress() != null ? req.getAddress() : new PropertyAddressReq());
-
-    Long yeonPyongPrice = calculateYeonPyongPrice(req.getPrice(), req.getLedges());
-
-    PriceInformation priceInformation = priceInfoService.create(
-        req.getPrice() != null ? req.getPrice() : new PriceProperties(), yeonPyongPrice, req.getLands());
-
-    RegisterInformation registerInformation = registerInfoService.create(
-        req.getRegister() != null ? req.getRegister() : new RegisterProperties());
-
-    TemplateInformation templateInformation = templateFacade.createTemplateInformation(req);
-
-    PropertyDefaultReq defaults = req.getDefaults();
-    if (defaults != null && defaults.getThumbnailId() != null) {
-      defaults.setThumbnailImageUrl(uploadFileService.getById(defaults.getThumbnailId()));
-    } else {
-      defaults.setThumbnailImageUrl(null);
-    }
-    Long exclusiveId = null;
-    if (defaults.getExclusiveId() != null) {
-      exclusiveId = defaults.getExclusiveId();
-
-    }
-
-    return Property.builder()
-        .adminId(req.getDefaults().getAdminId())
-        .isPublic(defaults.getIsPublic())
-        .exclusiveAgentId(exclusiveId)
-        .thumbnailImageUrl(defaults.getThumbnailImageUrl())
-        .buildingName(defaults.getBuildingName())
-        .status(defaults.getStatus())
-        .bigCategory(categoryService.getById(defaults.getBigCategoryId()))
-        .smallCategories(defaults.getSmallCategoryIds() != null ? 
-            defaults.getSmallCategoryIds().stream()
-                .map(categoryService::getById)
-                .collect(Collectors.toSet()) : new LinkedHashSet<>())
-        .address(addressInformation)
-        .price(priceInformation)
-        .register(registerInformation)
-        .template(templateInformation)
-        .exclusiveAgentId(exclusiveId)
-        .build();
-  }
-
   public PropertyDetailResp getInfo(Long propertyId, Long userId) {
     Property property = propertyService.getByIdWithAllDetails(propertyId);
     List<PropertyLedgeResp> propertyLedgeResps = propertyMapper.propertyLedgeResp(property);
@@ -463,7 +403,7 @@ public class AdminPropertyFacade {
 
     Details details = detailsService.getByPropertyId(propertyId);
 
-    List<UploadFileResp> propertyImages = details != null && details.getPropertyImages() != null 
+    List<UploadFileResp> propertyImages = details != null && details.getPropertyImages() != null
         ? details.getPropertyImages().stream().map(uploadFileService::uploadFileResp).toList()
         : new ArrayList<>();
 
@@ -504,7 +444,7 @@ public class AdminPropertyFacade {
 
     Details details = detailsService.getByPropertyId(propertyId);
 
-    List<UploadFileResp> propertyImages = details != null && details.getPropertyImages() != null 
+    List<UploadFileResp> propertyImages = details != null && details.getPropertyImages() != null
         ? details.getPropertyImages().stream().map(uploadFileService::uploadFileResp).toList()
         : new ArrayList<>();
 
@@ -572,38 +512,38 @@ public class AdminPropertyFacade {
     List<Property> allProperties = new ArrayList<>();
     int batchSize = 1000;
     int page = 0;
-    
+
     log.info("Starting paging query with batch size: {}", batchSize);
-    
+
     while (true) {
       long batchStart = System.currentTimeMillis();
       Pageable pageable = PageRequest.of(page, batchSize);
       Page<Property> propertyPage = propertyRepository.findAllWithBasicDetails(pageable);
       long batchEnd = System.currentTimeMillis();
-      
+
       allProperties.addAll(propertyPage.getContent());
-      
-      log.info("Batch {} completed: {}ms, Records: {}, Total: {}", 
+
+      log.info("Batch {} completed: {}ms, Records: {}, Total: {}",
           page, batchEnd - batchStart, propertyPage.getContent().size(), allProperties.size());
-      
+
       if (!propertyPage.hasNext()) {
         break;
       }
       page++;
-      
+
       // 메모리 상태 로그 (10배치마다)
       if (page % 10 == 0) {
         Runtime runtime = Runtime.getRuntime();
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        log.info("Memory status at batch {}: Used {}MB, Free {}MB", 
+        log.info("Memory status at batch {}: Used {}MB, Free {}MB",
             page, usedMemory / 1024 / 1024, runtime.freeMemory() / 1024 / 1024);
       }
     }
-    
+
     long totalTime = System.currentTimeMillis() - startTime;
-    log.info("Paging query completed: Total {}ms, Batches: {}, Records: {}", 
+    log.info("Paging query completed: Total {}ms, Batches: {}, Records: {}",
         totalTime, page + 1, allProperties.size());
-    
+
     return allProperties;
   }
 
@@ -1590,23 +1530,23 @@ public class AdminPropertyFacade {
     List<Property> allProperties = new ArrayList<>();
     int batchSize = 1000;
     int page = 0;
-    
+
     while (true) {
       Pageable pageable = PageRequest.of(page, batchSize);
       Page<Property> propertyPage = propertyRepository.findDeletedAllWithBasicDetails(pageable);
-      
+
       if (propertyPage.isEmpty()) {
         break;
       }
-      
+
       allProperties.addAll(propertyPage.getContent());
       page++;
-      
+
       if (!propertyPage.hasNext()) {
         break;
       }
     }
-    
+
     return allProperties;
   }
 
@@ -1670,13 +1610,13 @@ public class AdminPropertyFacade {
 
     try {
       StringBuilder csv = new StringBuilder();
-      
+
       // 헤더 추가
       csv.append(String.join(",", PROPERTY_HEADERS)).append("\n");
 
       for (Property property : properties) {
         List<String> row = new ArrayList<>();
-        
+
         // 기존 setCellValueSafely 로직을 CSV용으로 변환 (null 안전 처리)
         row.add(csvValue(property.getId()));
         row.add(csvValue(property.getIsPublic() != null ? (property.getIsPublic() ? "공개" : "비공개") : ""));
@@ -1697,7 +1637,7 @@ public class AdminPropertyFacade {
 
         row.add(csvValue(property.getBuildingName()));
         row.add(csvValue(property.getBigCategory() != null ? property.getBigCategory().getName() : ""));
-        
+
         String smallCategories = "";
         if (property.getSmallCategories() != null && !property.getSmallCategories().isEmpty()) {
           smallCategories = property.getSmallCategories().stream()
@@ -1900,7 +1840,7 @@ public class AdminPropertyFacade {
   public void taskNoteUploadFile(MultipartFile file) {
     try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
       Sheet sheet = workbook.getSheetAt(0);
-      
+
       List<TaskNoteInsertData> batchInsertList = new ArrayList<>();
       int processedCount = 0;
 
@@ -1932,7 +1872,7 @@ public class AdminPropertyFacade {
         processBatchInsertWithTransaction(batchInsertList);
         log.info("최종 배치 처리 완료: {} 건", batchInsertList.size());
       }
-      
+
       log.info("TaskNote 업로드 완료 - 총 처리: {} 건", processedCount);
 
     } catch (Exception e) {
@@ -2008,7 +1948,7 @@ public class AdminPropertyFacade {
             if (floorInformation.getProperties() != null) {
               String propertyFloor = floorInformation.getProperties().getFloor();
               String upjong = floorInformation.getProperties().getUpjong();
-              
+
               floorInfo.stream()
                   .filter(apiFloor -> Objects.equals(apiFloor.getFloor(), propertyFloor) && Objects.equals(apiFloor.getUpjong(), upjong))
                   .findFirst()
@@ -2020,7 +1960,7 @@ public class AdminPropertyFacade {
 
                     // 기존 areaPyung == areaMeter
                     boolean currentValuesEqual = Objects.equals(currentAreaPyung, currentAreaMeter);
-                    
+
                     //기존 값과 API 값이 같으면
                     boolean apiValuesMatch = Objects.equals(apiAreaPyung, currentAreaPyung) && Objects.equals(apiAreaMeter, currentAreaMeter);
 
@@ -2060,7 +2000,7 @@ public class AdminPropertyFacade {
     public final Long adminId;
     public final TaskNoteData taskNoteData;
 
-    public TaskNoteInsertData(Long propertyId, TaskType taskType, LocalDateTime createdAt, 
+    public TaskNoteInsertData(Long propertyId, TaskType taskType, LocalDateTime createdAt,
                               String content, Long adminId, TaskNoteData taskNoteData) {
       this.propertyId = propertyId;
       this.taskType = taskType;
@@ -2104,21 +2044,21 @@ public class AdminPropertyFacade {
 
     // 매매가 : 150억 ▶ 142억 으로 변경되었습니다.
     String pattern = "^(.+?)\\s*:\\s*(.+?)\\s*▶\\s*(.+?)\\s*으로";
-    
+
     java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
     java.util.regex.Matcher matcher = regex.matcher(content.trim());
-    
+
     if (matcher.find()) {
       String koreanFieldType = matcher.group(1).trim();
       String beforeValue = matcher.group(2).trim();
       String afterValue = matcher.group(3).trim();
-      
+
       LogFieldType logFieldType = mapKoreanToLogFieldType(koreanFieldType);
       if (logFieldType != null) {
         return new TaskNoteData(logFieldType, beforeValue, afterValue);
       }
     }
-    
+
     return null;
   }
 
@@ -2928,13 +2868,13 @@ public class AdminPropertyFacade {
     if (detail == null || detail.trim().isEmpty()) {
       return detail;
     }
-    
+
     String trimmed = detail.trim();
     log.info("원본 detail: '{}'", trimmed);
-    
+
     // 숫자-숫자 또는 숫자 패턴 추출 (정규식 사용)
     String result = trimmed.replaceAll("^(\\d+(?:-\\d+)?).*", "$1");
-    
+
     log.info("잘린 detail: '{}'", result);
     return result;
   }
