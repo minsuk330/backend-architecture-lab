@@ -1,8 +1,13 @@
 package com.backend.lab.domain.property.core.service.info;
 
+import com.backend.lab.domain.property.core.entity.embedded.FloorProperties;
 import com.backend.lab.domain.property.core.entity.information.FloorInformation;
 import com.backend.lab.domain.property.core.repository.info.FloorInfoRepository;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,5 +43,21 @@ public class FloorInfoService {
   @Transactional
   public void deleteSingleFloor(Long floorId) {
     floorInfoRepository.deleteById(floorId);
+  }
+
+
+  public Set<FloorInformation> floorsAssignRank(Set<FloorProperties> floors, Boolean isPublic, Long buildingOrder) {
+    AtomicLong rankCounter = new AtomicLong(1);
+
+    return floors.stream()
+        .sorted(Comparator.comparingInt(FloorProperties::getPriority))
+        .map(floor -> create(
+            FloorInformation.builder()
+                .properties(floor)
+                .rank(rankCounter.getAndIncrement())
+                .buildingOrder(buildingOrder)
+                .isPublic(isPublic != null ? isPublic : true)
+                .build()))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

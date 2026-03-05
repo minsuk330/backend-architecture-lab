@@ -5,7 +5,6 @@ import com.backend.lab.api.admin.property.core.dto.req.PropertyFloorReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyTemplateReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyUpdateReq;
 import com.backend.lab.api.admin.property.core.facade.AdminPropertyMemberFacade;
-import com.backend.lab.api.admin.property.core.facade.FloorFacade;
 import com.backend.lab.api.admin.property.core.facade.TemplateFacade;
 import com.backend.lab.domain.admin.core.entity.Admin;
 import com.backend.lab.domain.admin.core.service.AdminService;
@@ -62,7 +61,6 @@ public class UpdatePropertyUseCase {
   private final AdminPropertyMemberFacade adminPropertyMemberFacade;
   private final LedgeInfoService ledgeInfoService;
   private final LandInfoService landInfoService;
-  private final FloorFacade floorFacade;
   private final FloorInfoService floorInfoService;
 
   @Transactional
@@ -91,6 +89,8 @@ public class UpdatePropertyUseCase {
     propertyService.update(propertyId, req, bigCateogry, smallCategories);
 
   }
+
+
 
   private void updateInfoList(PropertyUpdateReq req, Long propertyId) {
     Property property = propertyService.getById(propertyId);
@@ -175,7 +175,7 @@ public class UpdatePropertyUseCase {
         //각 빌딩마다 수행한다.
         PropertyFloorReq propertyFloorReq = floors.get(i); //req에서 set꺼내서 하나씩 비교함
         if (propertyFloorReq != null && !propertyFloorReq.getFloor().isEmpty()) {
-          Set<FloorInformation> floorInformations = floorFacade.floorsAssignRank(
+          Set<FloorInformation> floorInformations = floorInfoService.floorsAssignRank(
               propertyFloorReq.getFloor(),//층 하나들어감
               propertyFloorReq.getIsPublic(),
               buildingOrder);

@@ -81,4 +81,28 @@ public class FloorProperties {
 
     return this;
   }
+
+  public int getPriority() {
+    if (this.getFloor().startsWith("옥탑")) {
+      // 옥탑: 높은 층이 먼저 (옥탑3층=1, 옥탑2층=2, 옥탑1층=3)
+      int num = extractNumber(this.getFloor().substring(2));
+      return 100 - num;  // 큰 수일수록 작은 우선순위
+    } else if (this.getFloor().startsWith("지")) {
+      // 지하: 낮은 층이 먼저 (지1층=1001, 지2층=1002, 지3층=1003)
+      int num = extractNumber(this.getFloor().substring(1));
+      return 1000 + num;
+    } else {
+      // 지상: 높은 층이 먼저 (10층=90, 5층=95, 1층=99)₩
+      int num = extractNumber(this.getFloor());
+      return 200 - num;  // 큰 수일수록 작은 우선순위
+    }
+  }
+
+  private int extractNumber(String str) {
+    try {
+      return Integer.parseInt(str.replaceAll("[^0-9]", ""));
+    } catch (Exception e) {
+      return 0;
+    }
+  }
 }

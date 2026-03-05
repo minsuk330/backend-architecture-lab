@@ -5,7 +5,6 @@ import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyDefaultReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyFloorReq;
 import com.backend.lab.api.admin.property.core.facade.AdminPropertyMemberFacade;
-import com.backend.lab.api.admin.property.core.facade.FloorFacade;
 import com.backend.lab.api.admin.property.core.facade.TemplateFacade;
 import com.backend.lab.domain.admin.core.entity.Admin;
 import com.backend.lab.domain.admin.core.service.AdminService;
@@ -30,6 +29,7 @@ import com.backend.lab.domain.property.core.entity.information.RegisterInformati
 import com.backend.lab.domain.property.core.entity.information.TemplateInformation;
 import com.backend.lab.domain.property.core.service.PropertyService;
 import com.backend.lab.domain.property.core.service.info.AddressInfoService;
+import com.backend.lab.domain.property.core.service.info.FloorInfoService;
 import com.backend.lab.domain.property.core.service.info.LandInfoService;
 import com.backend.lab.domain.property.core.service.info.LedgeInfoService;
 import com.backend.lab.domain.property.core.service.info.PriceInfoService;
@@ -65,12 +65,12 @@ public class CreatePropertyUseCase {
   private final SecretService secretService;
   private final LedgeInfoService ledgeInfoService;
   private final LandInfoService landInfoService;
-  private final FloorFacade floorFacade;
   private final PropertyChangeDetectService propertyChangeDetectService;
   private final MemberService memberService;
   private final NotificationService notificationService;
   private final DetailsService detailsService;
   private final AdminPropertyMemberFacade adminPropertyMemberFacade;
+  private final FloorInfoService floorInfoService;
 
 
   @Transactional
@@ -138,7 +138,7 @@ public class CreatePropertyUseCase {
         //각 빌딩마다 수행한다.
         PropertyFloorReq propertyFloorReq = floors.get(i); //req에서 set꺼내서 하나씩 비교함
         if (propertyFloorReq != null && !propertyFloorReq.getFloor().isEmpty()) {
-          Set<FloorInformation> floorInformations = floorFacade.floorsAssignRank(
+          Set<FloorInformation> floorInformations = floorInfoService.floorsAssignRank(
               propertyFloorReq.getFloor(),//층 하나들어감
               propertyFloorReq.getIsPublic(),
               buildingOrder);

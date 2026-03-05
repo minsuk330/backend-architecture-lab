@@ -146,4 +146,7 @@ public class Property extends BaseEntity {
   @JoinColumn(name = "template_information_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private TemplateInformation template;
+
+
+
 }
