@@ -5,7 +5,6 @@ import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyDefaultReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyFloorReq;
 import com.backend.lab.api.admin.property.core.facade.AdminPropertyMemberFacade;
-import com.backend.lab.api.admin.property.core.facade.TemplateFacade;
 import com.backend.lab.domain.admin.core.entity.Admin;
 import com.backend.lab.domain.admin.core.service.AdminService;
 import com.backend.lab.domain.details.entity.dto.req.DetailReq;
@@ -34,6 +33,7 @@ import com.backend.lab.domain.property.core.service.info.LandInfoService;
 import com.backend.lab.domain.property.core.service.info.LedgeInfoService;
 import com.backend.lab.domain.property.core.service.info.PriceInfoService;
 import com.backend.lab.domain.property.core.service.info.RegisterInfoService;
+import com.backend.lab.domain.property.core.service.info.TemplateInfoService;
 import com.backend.lab.domain.property.propertyWorkLog.service.PropertyChangeDetectService;
 import com.backend.lab.domain.property.taskNote.service.TaskNoteService;
 import com.backend.lab.domain.secret.service.SecretService;
@@ -57,7 +57,7 @@ public class CreatePropertyUseCase {
   private final AddressInfoService addressInfoService;
   private final PriceInfoService priceInfoService;
   private final RegisterInfoService registerInfoService;
-  private final TemplateFacade templateFacade;
+  private final TemplateInfoService templateInfoService;
   private final UploadFileService uploadFileService;
   private final CategoryService categoryService;
   private final PropertyService propertyService;
@@ -201,7 +201,7 @@ public class CreatePropertyUseCase {
     RegisterInformation registerInformation = registerInfoService.create(
         req.getRegister() != null ? req.getRegister() : new RegisterProperties());
 
-    TemplateInformation templateInformation = templateFacade.createTemplateInformation(req);
+    TemplateInformation templateInformation = templateInfoService.create(req.getTemplate());
 
     PropertyDefaultReq defaults = req.getDefaults();
     if (defaults != null && defaults.getThumbnailId() != null) {

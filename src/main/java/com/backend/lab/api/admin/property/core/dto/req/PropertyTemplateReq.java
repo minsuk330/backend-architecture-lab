@@ -3,6 +3,9 @@ package com.backend.lab.api.admin.property.core.dto.req;
 import com.backend.lab.domain.uploadFile.entity.UploadFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -105,5 +108,16 @@ public class PropertyTemplateReq {
   @Setter
   @JsonIgnore
   private UploadFile etc10Url;
+
+  public List<Long> collectFileIds() {
+    return Stream.of(
+        info1UrlId, info2UrlId,
+        planPartUrlId, planEntireUrlId,
+        etc1UrlId, etc2UrlId, etc3UrlId,
+        etc4UrlId, etc5UrlId, etc6UrlId,
+        etc7UrlId, etc8UrlId, etc9UrlId,
+        etc10UrlId
+    ).filter(Objects::nonNull).toList();
+  }
 
 }

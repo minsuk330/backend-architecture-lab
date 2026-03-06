@@ -68,26 +68,39 @@ UseCase
 
 ---
 
-## 8. Value Object란?
+## 8. 도메인 로직을 객체에 넣는 기준
 
-값 자체가 동일성을 나타내는 객체. ID가 없고 값이 같으면 같은 객체로 취급한다.
+### Value Object 개념
+
+값 자체가 동일성을 나타내는 객체. ID가 없고 **불변(Immutable)** 이어야 한다.
 
 ```java
-// Entity: ID로 동일성 판단
-Property p1 = new Property(id: 1);
-Property p2 = new Property(id: 1);
-p1 == p2 → true (같은 ID)
-
-// Value Object: 값으로 동일성 판단
-PriceProperties p1 = new PriceProperties(mmPrice: 1000);
-PriceProperties p2 = new PriceProperties(mmPrice: 1000);
-p1 == p2 → true (같은 값)
+// 완전한 Value Object 조건
+// 1. 불변 (final 필드, setter 없음)
+// 2. 값으로 동일성 판단
+// 3. 새 값이 필요하면 새 객체 반환
+public final class Money {
+    private final Long amount;  // setter 없음
+}
 ```
 
-이 프로젝트에서 `@Embeddable`이 붙은 클래스들이 Value Object이다.
-(`FloorProperties`, `PriceProperties`, `AddressProperties` 등)
+### 이 프로젝트의 FloorProperties는 완전한 Value Object가 아님
 
-### Value Object에 메서드를 넣는 기준
+```java
+@Embeddable
+@Getter
+@Setter  // ← setter 있음, 가변 객체
+public class FloorProperties {
+    private String floor;
+}
+```
+
+`@Setter`가 있고 변경 가능하므로 순수한 Value Object 조건을 충족하지 않는다.
+JPA `@Embeddable`로 구조적으로는 Value Object처럼 쓰이지만 불변성은 보장되지 않는다.
+
+### 그럼에도 getPriority()를 FloorProperties에 넣는 이유
+
+Value Object 여부와 무관하게 **"이 로직이 어떤 데이터를 필요로 하는가"** 가 기준이다.
 
 ```
 이 계산에 필요한 데이터가 이 객체 안에만 있는가?  → YES: 이 객체의 메서드

@@ -5,7 +5,6 @@ import com.backend.lab.api.admin.property.core.dto.req.PropertyFloorReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyTemplateReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyUpdateReq;
 import com.backend.lab.api.admin.property.core.facade.AdminPropertyMemberFacade;
-import com.backend.lab.api.admin.property.core.facade.TemplateFacade;
 import com.backend.lab.domain.admin.core.entity.Admin;
 import com.backend.lab.domain.admin.core.service.AdminService;
 import com.backend.lab.domain.details.service.DetailsService;
@@ -25,6 +24,7 @@ import com.backend.lab.domain.property.core.service.info.LandInfoService;
 import com.backend.lab.domain.property.core.service.info.LedgeInfoService;
 import com.backend.lab.domain.property.core.service.info.PriceInfoService;
 import com.backend.lab.domain.property.core.service.info.RegisterInfoService;
+import com.backend.lab.domain.property.core.service.info.TemplateInfoService;
 import com.backend.lab.domain.property.propertyWorkLog.entity.vo.LogFieldType;
 import com.backend.lab.domain.property.propertyWorkLog.service.PropertyChangeDetectService;
 import com.backend.lab.domain.property.taskNote.service.TaskNoteService;
@@ -54,7 +54,7 @@ public class UpdatePropertyUseCase {
   private final AddressInfoService addressInfoService;
   private final PriceInfoService priceInfoService;
   private final RegisterInfoService registerInfoService;
-  private final TemplateFacade templateFacade;
+  private final TemplateInfoService templateInfoService;
   private final SecretService secretService;
   private final UploadFileService uploadFileService;
   private final DetailsService detailsService;
@@ -240,7 +240,7 @@ public class UpdatePropertyUseCase {
 
     registerInfoService.update(req.getRegister() != null ? req.getRegister() : new RegisterProperties(), property.getRegister().getId());
 
-    templateFacade.updateTemplateInformation(
+    templateInfoService.update(
         req.getTemplate() != null ? req.getTemplate() : new PropertyTemplateReq(),
         property.getTemplate().getId()
     );
