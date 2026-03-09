@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class LandUsePlanApiService {
+public class LandUsePlanApiService implements LandUsePlanApiPort {
 
   private final WebClient webClient;
 

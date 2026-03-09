@@ -21,7 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class FloorApiService {
+public class FloorApiService implements FloorApiPort {
 
   private final WebClient webClient;
 

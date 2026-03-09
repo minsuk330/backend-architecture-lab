@@ -12,12 +12,12 @@ import com.backend.lab.api.admin.property.info.dto.resp.PropertyMoveInfoResp;
 import com.backend.lab.common.exception.BusinessException;
 import com.backend.lab.common.exception.ErrorCode;
 import com.backend.lab.common.openapi.dto.landPossession.LandPossessionResp;
-import com.backend.lab.common.openapi.service.gong.FloorApiService;
-import com.backend.lab.common.openapi.service.toji.LandCharacteristicApiService;
-import com.backend.lab.common.openapi.service.toji.LandPossessionApiService;
-import com.backend.lab.common.openapi.service.toji.LandUsePlanApiService;
-import com.backend.lab.common.openapi.service.tojiList.LandMoveApiService;
-import com.backend.lab.common.openapi.service.gong.LedgerApiService;
+import com.backend.lab.common.openapi.service.gong.FloorApiPort;
+import com.backend.lab.common.openapi.service.toji.LandCharacteristicApiPort;
+import com.backend.lab.common.openapi.service.toji.LandPossessionApiPort;
+import com.backend.lab.common.openapi.service.toji.LandUsePlanApiPort;
+import com.backend.lab.common.openapi.service.tojiList.LandMoveApiPort;
+import com.backend.lab.common.openapi.service.gong.LedgerApiPort;
 import com.backend.lab.domain.property.core.entity.embedded.LandProperties;
 import com.backend.lab.domain.property.core.entity.embedded.LedgerProperties;
 import com.backend.lab.common.openapi.dto.landCharacteristic.LandCharacteristicResp;
@@ -38,13 +38,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PropertyInfoFacade {
 
-  private final LedgerApiService ledgerApiService;
-  private final FloorApiService floorApiService;
+  private final LedgerApiPort ledgerApiPort;
+  private final FloorApiPort floorApiPort;
 
-  private final LandMoveApiService landMoveApiService;
-  private final LandCharacteristicApiService landCharacteristicApiService;
-  private final LandPossessionApiService landPossessionApiService;
-  private final LandUsePlanApiService landUsePlanApiService;
+  private final LandMoveApiPort landMoveApiPort;
+  private final LandCharacteristicApiPort landCharacteristicApiPort;
+  private final LandPossessionApiPort landPossessionApiPort;
+  private final LandUsePlanApiPort landUsePlanApiPort;
 
 
   //토지정보 조회
@@ -53,13 +53,13 @@ public class PropertyInfoFacade {
     try {
       // 3개 API를 병렬로 호출
       CompletableFuture<LandCharacteristicResp> characteristicsFuture =
-          landCharacteristicApiService.getLandCharacteristicInfo(pnu);
+          landCharacteristicApiPort.getLandCharacteristicInfo(pnu);
 
       CompletableFuture<LandPossessionResp> possessionFuture =
-          landPossessionApiService.getLandOwnerInfo(pnu);
+          landPossessionApiPort.getLandOwnerInfo(pnu);
 
       CompletableFuture<LandUseResp> landUsesFuture =
-          landUsePlanApiService.getLandUsePlanInfo(pnu);
+          landUsePlanApiPort.getLandUsePlanInfo(pnu);
 
       // 모든 결과 대기
       CompletableFuture<Void> allFutures = CompletableFuture.allOf(
@@ -97,7 +97,7 @@ public class PropertyInfoFacade {
   //건물 목록 조회
   public PropertyBuildingInfoResp getBuildingInfo(String pnu) {
     try {
-      CompletableFuture<List<BuildingInfo>> buildingInfoFuture = ledgerApiService.getBuildingInfo(pnu);
+      CompletableFuture<List<BuildingInfo>> buildingInfoFuture = ledgerApiPort.getBuildingInfo(pnu);
       List<BuildingInfo> buildingInfoList = buildingInfoFuture.get();
 
       return PropertyBuildingInfoResp.builder()
@@ -115,7 +115,7 @@ public class PropertyInfoFacade {
   public PropertyLedgerInfoResp getLedgerInfo(PropertySelectedBuildingInfoReq req) {
     List<LedgerProperties> ledgerProperties = new ArrayList<>();
     try {
-      CompletableFuture<List<LedgerProperties>> ledgerInfo = ledgerApiService.getLedgerInfo(
+      CompletableFuture<List<LedgerProperties>> ledgerInfo = ledgerApiPort.getLedgerInfo(
           req.getPnu(), req.getBuildings());
       ledgerProperties = ledgerInfo.get();
     } catch (InterruptedException | ExecutionException e) {
@@ -131,7 +131,7 @@ public class PropertyInfoFacade {
   public PropertyMoveInfoResp getMoves(String pnu) {
     List<PropertyMoveInfoItem> propertyMoveInfoItems = null;
     try {
-      CompletableFuture<List<PropertyMoveInfoItem>> landMovesInfo = landMoveApiService.getLandMovesInfo(
+      CompletableFuture<List<PropertyMoveInfoItem>> landMovesInfo = landMoveApiPort.getLandMovesInfo(
           pnu);
       propertyMoveInfoItems = landMovesInfo.get();
     } catch (InterruptedException | ExecutionException e) {
@@ -153,7 +153,7 @@ public class PropertyInfoFacade {
   //층 정보 조회
   public PropertyFloorInfoResp getFloors(String pnu) {
     try {
-      CompletableFuture<List<PropertyFloorInfoItem>> floorInfo = floorApiService.getFloorInfo(pnu);
+      CompletableFuture<List<PropertyFloorInfoItem>> floorInfo = floorApiPort.getFloorInfo(pnu);
       List<PropertyFloorInfoItem> floors = floorInfo.get();
 
       return PropertyFloorInfoResp.builder()

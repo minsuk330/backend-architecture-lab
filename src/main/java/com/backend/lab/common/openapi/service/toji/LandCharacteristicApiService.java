@@ -21,7 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class LandCharacteristicApiService {
+public class LandCharacteristicApiService implements LandCharacteristicApiPort {
 
   private final WebClient webClient;
 

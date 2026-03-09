@@ -26,7 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class LedgerApiService {
+public class LedgerApiService implements LedgerApiPort {
 
   private final WebClient webClient;
 

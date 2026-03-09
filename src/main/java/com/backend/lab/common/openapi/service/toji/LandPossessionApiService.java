@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class LandPossessionApiService {
+public class LandPossessionApiService implements LandPossessionApiPort {
 
   private final WebClient webClient;
 
