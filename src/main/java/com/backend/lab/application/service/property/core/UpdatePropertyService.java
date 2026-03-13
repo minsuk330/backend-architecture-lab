@@ -1,4 +1,4 @@
-package com.backend.lab.application.property;
+package com.backend.lab.application.service.property.core;
 
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyFloorReq;
@@ -31,6 +31,7 @@ import com.backend.lab.domain.property.taskNote.service.TaskNoteService;
 import com.backend.lab.domain.secret.service.SecretService;
 import com.backend.lab.domain.uploadFile.entity.UploadFile;
 import com.backend.lab.domain.uploadFile.service.UploadFileService;
+import com.backend.lab.application.port.in.property.core.UpdatePropertyUseCase;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class UpdatePropertyUseCase {
+public class UpdatePropertyService implements UpdatePropertyUseCase {
 
 
   private final AdminService adminService;
@@ -63,6 +64,7 @@ public class UpdatePropertyUseCase {
   private final LandInfoService landInfoService;
   private final FloorInfoService floorInfoService;
 
+  @Override
   @Transactional
   public void execute(PropertyUpdateReq req, Long adminId, Long propertyId,
       String clientIp) {

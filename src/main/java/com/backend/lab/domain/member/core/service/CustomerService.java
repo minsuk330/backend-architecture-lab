@@ -1,7 +1,6 @@
 package com.backend.lab.domain.member.core.service;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCustomerCreateReq;
-import com.backend.lab.api.admin.property.core.facade.AdminPropertyFacade.MemberInfo;
 import com.backend.lab.common.exception.BusinessException;
 import com.backend.lab.common.exception.ErrorCode;
 import com.backend.lab.domain.member.core.entity.Member;
@@ -12,6 +11,8 @@ import com.backend.lab.domain.member.core.entity.embedded.CustomerProperties;
 import com.backend.lab.domain.member.core.entity.vo.MemberType;
 import com.backend.lab.domain.member.core.entity.vo.ProviderType;
 import com.backend.lab.domain.member.core.repository.MemberRepository;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -194,5 +195,20 @@ public class CustomerService {
   @Transactional
   public void delete(Member member) {
     memberRepository.delete(member);
+  }
+
+  @Data
+  @Builder
+  public static class MemberInfo {
+    private String name;
+    private String type;
+    private String phone;
+    private String homePhone;
+    private String funnel;
+    private String memo;
+
+    public boolean hasValidData() {
+      return name != null && !name.trim().isEmpty();
+    }
   }
 }

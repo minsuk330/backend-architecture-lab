@@ -1,4 +1,4 @@
-package com.backend.lab.application.property;
+package com.backend.lab.application.service.property.core;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyAddressReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyCreateReq;
@@ -39,6 +39,7 @@ import com.backend.lab.domain.property.taskNote.service.TaskNoteService;
 import com.backend.lab.domain.secret.service.SecretService;
 import com.backend.lab.domain.uploadFile.entity.UploadFile;
 import com.backend.lab.domain.uploadFile.service.UploadFileService;
+import com.backend.lab.application.port.in.property.core.CreatePropertyUseCase;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CreatePropertyUseCase {
+public class CreatePropertyService implements CreatePropertyUseCase {
 
   private final AdminService adminService;
   private final AddressInfoService addressInfoService;
@@ -73,6 +74,7 @@ public class CreatePropertyUseCase {
   private final FloorInfoService floorInfoService;
 
 
+  @Override
   @Transactional
   public void execute(PropertyCreateReq req, Long adminId, String clientIp){
     Admin admin = adminService.getById(adminId);
