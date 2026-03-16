@@ -2,7 +2,7 @@ package com.backend.lab.application.service.property.core;
 
 import com.backend.lab.api.admin.property.info.dto.resp.PropertyFloorInfoItem;
 import com.backend.lab.application.port.in.property.core.FloorUpdateUseCase;
-import com.backend.lab.common.openapi.service.gong.FloorApiPort;
+import com.backend.lab.application.port.out.openapi.FloorApiPort;
 import com.backend.lab.domain.property.core.entity.Property;
 import com.backend.lab.domain.property.core.repository.PropertyRepository;
 import com.backend.lab.domain.property.core.service.PropertyService;

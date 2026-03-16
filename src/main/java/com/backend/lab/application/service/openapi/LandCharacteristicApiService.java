@@ -1,6 +1,7 @@
-package com.backend.lab.common.openapi.service.toji;
+package com.backend.lab.application.service.openapi;
 
 
+import com.backend.lab.application.port.out.openapi.LandCharacteristicApiPort;
 import com.backend.lab.common.openapi.dto.landCharacteristic.LandCharacteristicApiResp;
 import com.backend.lab.common.openapi.dto.landCharacteristic.LandCharacteristicField;
 import com.backend.lab.common.openapi.dto.landCharacteristic.LandCharacteristicsData;

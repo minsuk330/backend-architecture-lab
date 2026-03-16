@@ -1,4 +1,4 @@
-package com.backend.lab.common.openapi.service.gong;
+package com.backend.lab.application.port.out.openapi;
 
 import com.backend.lab.api.admin.property.info.dto.resp.PropertyFloorInfoItem;
 import java.util.List;

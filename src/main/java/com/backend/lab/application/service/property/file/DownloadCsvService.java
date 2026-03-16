@@ -9,7 +9,6 @@ import com.backend.lab.domain.property.core.entity.embedded.PriceProperties;
 import com.backend.lab.domain.property.core.repository.PropertyRepository;
 import com.backend.lab.domain.property.core.service.PropertyService;
 import java.io.ByteArrayInputStream;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;

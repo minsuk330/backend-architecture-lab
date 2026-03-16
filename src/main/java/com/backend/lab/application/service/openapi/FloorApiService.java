@@ -1,5 +1,6 @@
-package com.backend.lab.common.openapi.service.gong;
+package com.backend.lab.application.service.openapi;
 
+import com.backend.lab.application.port.out.openapi.FloorApiPort;
 import com.backend.lab.common.openapi.dto.floor.BuildingFloorData;
 import com.backend.lab.common.openapi.dto.floor.FloorApiResp;
 import com.backend.lab.common.util.PnuComponents;

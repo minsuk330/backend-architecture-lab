@@ -1,6 +1,7 @@
-package com.backend.lab.common.openapi.service.tojiList;
+package com.backend.lab.application.service.openapi;
 
 import com.backend.lab.api.admin.property.info.dto.resp.PropertyMoveInfoItem;
+import com.backend.lab.application.port.out.openapi.LandMoveApiPort;
 import com.backend.lab.common.openapi.dto.landMove.LandMoveField;
 import com.backend.lab.common.openapi.dto.landMove.LandMovesResponse;
 import java.net.URI;

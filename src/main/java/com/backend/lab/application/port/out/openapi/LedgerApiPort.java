@@ -1,4 +1,4 @@
-package com.backend.lab.common.openapi.service.gong;
+package com.backend.lab.application.port.out.openapi;
 
 import com.backend.lab.api.admin.property.info.dto.BuildingInfo;
 import com.backend.lab.domain.property.core.entity.embedded.LedgerProperties;

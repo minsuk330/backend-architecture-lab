@@ -1,6 +1,7 @@
-package com.backend.lab.common.openapi.service.gong;
+package com.backend.lab.application.service.openapi;
 
 import com.backend.lab.api.admin.property.info.dto.BuildingInfo;
+import com.backend.lab.application.port.out.openapi.LedgerApiPort;
 import com.backend.lab.common.openapi.dto.ledger.BuildingLedgerData;
 import com.backend.lab.common.openapi.dto.ledger.LedgerApiResp;
 import com.backend.lab.common.util.PnuComponents;

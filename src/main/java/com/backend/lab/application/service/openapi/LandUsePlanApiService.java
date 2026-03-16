@@ -1,5 +1,6 @@
-package com.backend.lab.common.openapi.service.toji;
+package com.backend.lab.application.service.openapi;
 
+import com.backend.lab.application.port.out.openapi.LandUsePlanApiPort;
 import com.backend.lab.common.openapi.dto.landUsePlan.LandUseField;
 import com.backend.lab.common.openapi.dto.landUsePlan.LandUsesApiResp;
 import com.backend.lab.common.openapi.dto.landUsePlan.LandUseResp;

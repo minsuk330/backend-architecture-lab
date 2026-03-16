@@ -1,4 +1,4 @@
-package com.backend.lab.common.openapi.service.tojiList;
+package com.backend.lab.application.port.out.openapi;
 
 import com.backend.lab.api.admin.property.info.dto.resp.PropertyMoveInfoItem;
 import java.util.List;

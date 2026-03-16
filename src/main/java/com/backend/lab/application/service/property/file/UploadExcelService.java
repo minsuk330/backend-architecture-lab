@@ -5,7 +5,7 @@ import com.backend.lab.api.admin.property.info.dto.resp.PropertyFloorInfoItem;
 import com.backend.lab.api.admin.property.info.dto.resp.PropertyLandInfoResp;
 import com.backend.lab.api.admin.property.info.facade.PropertyInfoFacade;
 import com.backend.lab.application.port.in.property.file.UploadExcelUseCase;
-import com.backend.lab.common.openapi.service.gong.FloorApiPort;
+import com.backend.lab.application.port.out.openapi.FloorApiPort;
 import com.backend.lab.common.openapi.service.kakao.KakaoApiService;
 import com.backend.lab.common.openapi.service.kakao.dto.KakaoAddressSearchResponse;
 import com.backend.lab.common.openapi.service.kakao.dto.KakaoAddressSearchResponse.KakaoDocument;
@@ -314,44 +314,44 @@ public class UploadExcelService implements UploadExcelUseCase {
 
         String jibunAddress = buildAddress(sido, gugun, dong, detail);
 
-        String pnu = null;
-        Double lat = null;
-        Double lng = null;
+        String pnu = "1168010800102420051";
+        Double lat = 37.5151402017276;
+        Double lng = 127.041732163787;
         String roadAddress = null;
         Integer bun = null;
         Integer ji = null;
 
-        try {
-            log.info("카카오 주소 검색 시도: {}", jibunAddress);
-            KakaoAddressSearchResponse kakao = kakaoApiService.searchAddress(jibunAddress);
-
-            if (kakao != null && kakao.getDocuments() != null && !kakao.getDocuments().isEmpty()) {
-                KakaoDocument document = kakao.getDocuments().get(0);
-                String mountainNumber = "N".equals(document.getAddress().getMountainYn()) ? "1" : "2";
-                String mainAddressNo = String.format("%04d",
-                    Integer.parseInt(document.getAddress().getMainAddressNo()));
-                String subAddressNo = String.format("%04d",
-                    Integer.parseInt(
-                        document.getAddress().getSubAddressNo() != null && !document.getAddress().getSubAddressNo().isEmpty()
-                            ? document.getAddress().getSubAddressNo() : "0"));
-
-                pnu = document.getAddress().getBCode() + mountainNumber + mainAddressNo + subAddressNo;
-                lat = Double.parseDouble(document.getY());
-                lng = Double.parseDouble(document.getX());
-
-                PnuComponents pnuComponents = PnuComponents.parse(pnu);
-                bun = Integer.valueOf(pnuComponents.getBun());
-                ji = Integer.valueOf(pnuComponents.getJi());
-
-                if (document.getRoadAddress() != null) {
-                    roadAddress = document.getRoadAddress().getAddressName();
-                }
-            } else {
-                log.warn("카카오 주소 검색 결과 없음: {}", jibunAddress);
-            }
-        } catch (Exception e) {
-            log.warn("카카오 주소 검색 실패: {}, 오류: {}", jibunAddress, e.getMessage());
-        }
+//        try {
+//            log.info("카카오 주소 검색 시도: {}", jibunAddress);
+//            KakaoAddressSearchResponse kakao = kakaoApiService.searchAddress(jibunAddress);
+//
+//            if (kakao != null && kakao.getDocuments() != null && !kakao.getDocuments().isEmpty()) {
+//                KakaoDocument document = kakao.getDocuments().get(0);
+//                String mountainNumber = "N".equals(document.getAddress().getMountainYn()) ? "1" : "2";
+//                String mainAddressNo = String.format("%04d",
+//                    Integer.parseInt(document.getAddress().getMainAddressNo()));
+//                String subAddressNo = String.format("%04d",
+//                    Integer.parseInt(
+//                        document.getAddress().getSubAddressNo() != null && !document.getAddress().getSubAddressNo().isEmpty()
+//                            ? document.getAddress().getSubAddressNo() : "0"));
+//
+//                pnu = document.getAddress().getBCode() + mountainNumber + mainAddressNo + subAddressNo;
+//                lat = Double.parseDouble(document.getY());
+//                lng = Double.parseDouble(document.getX());
+//
+//                PnuComponents pnuComponents = PnuComponents.parse(pnu);
+//                bun = Integer.valueOf(pnuComponents.getBun());
+//                ji = Integer.valueOf(pnuComponents.getJi());
+//
+//                if (document.getRoadAddress() != null) {
+//                    roadAddress = document.getRoadAddress().getAddressName();
+//                }
+//            } else {
+//                log.warn("카카오 주소 검색 결과 없음: {}", jibunAddress);
+//            }
+//        } catch (Exception e) {
+//            log.warn("카카오 주소 검색 실패: {}, 오류: {}", jibunAddress, e.getMessage());
+//        }
 
         AddressProperties addressProps = AddressProperties.builder()
             .pnu(pnu)

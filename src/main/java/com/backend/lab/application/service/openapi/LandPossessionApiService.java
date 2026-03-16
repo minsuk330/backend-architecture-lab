@@ -1,5 +1,6 @@
-package com.backend.lab.common.openapi.service.toji;
+package com.backend.lab.application.service.openapi;
 
+import com.backend.lab.application.port.out.openapi.LandPossessionApiPort;
 import com.backend.lab.common.openapi.dto.landPossession.LandPossessionApiResp;
 import com.backend.lab.common.openapi.dto.landPossession.LandPossessionField;
 import com.backend.lab.common.openapi.dto.landPossession.LandPossessionResp;
