@@ -1,6 +1,7 @@
 package com.backend.lab.domain.property.core.service;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyMapListReq;
+import com.backend.lab.api.admin.property.core.dto.resp.PropertyAdminMapDto;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyStatReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyUpdateReq;
 import com.backend.lab.api.admin.property.core.dto.resp.PropertyAddressResp;
@@ -117,21 +118,6 @@ public class PropertyService {
     return propertyRepository.memberWishlist(options, memberId);
   }
 
-  public Page<Property> agentPropertyList(PropertyMemberOptions options) {
-    return propertyRepository.findByAgent(options);
-  }
-  public Page<Property> sellerPropertyList(PropertyMemberOptions options, Member member) {
-    return propertyRepository.findBySeller(member.getId(),options);
-  }
-
-  public Page<Property> buyerPropertyList(PropertyMemberOptions options) {
-    return propertyRepository.findByBuyer(options);
-  }
-  public Page<Property> nonMemberPropertyList(PropertyMemberOptions options) {
-    return propertyRepository.findBynonMember(options);
-  }
-
-
   @Transactional
   public void update(Long id, PropertyUpdateReq req, Category bigCategory, Set<Category> smallCategories) {
     Property property = getById(id);
@@ -189,6 +175,11 @@ public class PropertyService {
   public List<Property> getsByMap(PropertyMapListReq req, List<Long> adminIds,
       List<Long> bigCategoryIds, List<Long> smallCategoryIds) {
     return propertyRepository.getsByMap(req, adminIds, bigCategoryIds, smallCategoryIds);
+  }
+
+  public List<PropertyAdminMapDto> getsByMapDto(PropertyMapListReq req, List<Long> adminIds,
+      List<Long> bigCategoryIds, List<Long> smallCategoryIds) {
+    return propertyRepository.getsByMapDto(req, adminIds, bigCategoryIds, smallCategoryIds);
   }
 
   public List<Property> gets(List<Long> ids) {

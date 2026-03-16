@@ -16,7 +16,6 @@ import com.backend.lab.application.port.in.property.core.GetPropertyDetailUseCas
 import com.backend.lab.application.port.in.property.core.GetPropertyInfoUseCase;
 import com.backend.lab.application.port.in.property.core.GetUpdatePropertyUseCase;
 import com.backend.lab.application.port.in.property.core.UpdatePropertyUseCase;
-import com.backend.lab.common.auth.annotation.RequireAdminRole;
 import com.backend.lab.common.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;

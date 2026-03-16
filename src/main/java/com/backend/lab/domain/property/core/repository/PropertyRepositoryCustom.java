@@ -2,6 +2,7 @@ package com.backend.lab.domain.property.core.repository;
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyMapListReq;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyStatReq;
+import com.backend.lab.api.admin.property.core.dto.resp.PropertyAdminMapDto;
 import com.backend.lab.api.admin.property.core.dto.resp.PropertyStatResp;
 import com.backend.lab.api.admin.wishlist.dto.req.SearchWishlistOptions;
 import com.backend.lab.api.common.searchFilter.dto.req.SearchPropertyOptions;
@@ -36,6 +37,9 @@ public interface PropertyRepositoryCustom {
 
   List<Property> getsByMap(PropertyMapListReq req, List<Long> adminIds, List<Long> bigCategoryIds,
       List<Long> smallCategoryIds);
+
+  List<PropertyAdminMapDto> getsByMapDto(PropertyMapListReq req, List<Long> adminIds,
+      List<Long> bigCategoryIds, List<Long> smallCategoryIds);
 
   List<Property> getsByMapWithSeller(PropertyMapListReq req, List<Long> adminIds, List<Long> bigCategoryIds, List<Long> smallCategoryIds,
       Member member);

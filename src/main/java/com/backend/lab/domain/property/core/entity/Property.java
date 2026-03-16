@@ -114,7 +114,7 @@ public class Property extends BaseEntity {
 
 
   @Builder.Default
-  @BatchSize(size = 100)
+  @BatchSize(size = 1000)
   @OrderBy("buildingOrder ASC")
   @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(

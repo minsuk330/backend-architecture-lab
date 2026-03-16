@@ -2,6 +2,9 @@ package com.backend.lab.domain.property.core.repository;
 
 
 import com.backend.lab.api.admin.property.core.dto.req.PropertyMapListReq;
+import com.backend.lab.api.admin.property.core.dto.resp.PropertyAdminMapDto;
+import com.backend.lab.api.admin.property.core.dto.resp.QPropertyAdminMapDto;
+import com.backend.lab.domain.property.core.entity.information.QLedgeInformation;
 import com.backend.lab.api.admin.property.core.dto.req.PropertyStatReq;
 import com.backend.lab.api.admin.property.core.dto.req.StatFilterable;
 import com.backend.lab.api.admin.property.core.dto.resp.PropertyStatResp;
@@ -316,6 +319,75 @@ public class PropertyRepositoryCustomImpl implements PropertyRepositoryCustom {
   }
 
 
+  @Override
+  public List<PropertyAdminMapDto> getsByMapDto(PropertyMapListReq req, List<Long> adminIds,
+      List<Long> bigCategoryIds, List<Long> smallCategoryIds) {
+    QLedgeInformation ledge = QLedgeInformation.ledgeInformation;
+    OrderSpecifier<?> orderSpecifier = repositoryHelper.createOrderSpecifier(req.getSortType());
+    BooleanBuilder finalBuilder = new BooleanBuilder();
+
+    BooleanBuilder menuBuilder = repositoryHelper.buildMenuTypesPredicate(req.getMenuTypes());
+    if (menuBuilder.hasValue()) {
+      finalBuilder.and(menuBuilder);
+    }
+
+    BooleanBuilder listBuilder = repositoryHelper.buildListPredicates(req, adminIds, bigCategoryIds,
+        smallCategoryIds);
+    if (listBuilder.hasValue()) {
+      finalBuilder.and(listBuilder);
+    }
+
+    return queryFactory
+        .select(new QPropertyAdminMapDto(
+            property.id,
+            property.createdAt,
+            property.updatedAt,
+            property.price.properties.mmPrice,
+            property.price.properties.pyeongPrice,
+            property.status,
+            property.buildingName,
+            property.thumbnailImageUrl.fileName,
+            property.thumbnailImageUrl.fileUrl,
+            property.address.properties.pnu,
+            property.address.properties.roadAddress,
+            property.address.properties.jibunAddress,
+            property.address.properties.lat,
+            property.address.properties.lng,
+            ledge.properties.minFloor.min(),
+            ledge.properties.maxFloor.max(),
+            ledge.properties.yeonAreaPyeong.sum(),
+            ledge.properties.yeonAreaMeter.sum(),
+            ledge.properties.buildingAreaPyeong.sum(),
+            ledge.properties.buildingAreaMeter.sum(),
+            ledge.properties.landAreaPyeong.sum(),
+            ledge.properties.landAreaMeter.sum()
+        ))
+        .from(property)
+        .leftJoin(property.price)
+        .leftJoin(property.address)
+        .leftJoin(property.thumbnailImageUrl)
+        .leftJoin(property.ledge, ledge)
+        .where(finalBuilder)
+        .groupBy(
+            property.id,
+            property.createdAt,
+            property.updatedAt,
+            property.price.properties.mmPrice,
+            property.price.properties.pyeongPrice,
+            property.status,
+            property.buildingName,
+            property.thumbnailImageUrl.fileName,
+            property.thumbnailImageUrl.fileUrl,
+            property.address.properties.pnu,
+            property.address.properties.roadAddress,
+            property.address.properties.jibunAddress,
+            property.address.properties.lat,
+            property.address.properties.lng
+        )
+        .orderBy(orderSpecifier)
+        .fetch();
+  }
+
   public List<Property> getsByMap(PropertyMapListReq req, List<Long> adminIds,
       List<Long> bigCategoryIds, List<Long> smallCategoryIds) {
     OrderSpecifier<?> orderSpecifier = repositoryHelper.createOrderSpecifier(req.getSortType());
@@ -337,6 +409,7 @@ public class PropertyRepositoryCustomImpl implements PropertyRepositoryCustom {
     // 필요한 연관관계만 fetchJoin + 결과 제한
     List<Property> rows = queryFactory.selectFrom(property)
         .leftJoin(property.price).fetchJoin()
+        .leftJoin(property.ledge).fetchJoin()
         .leftJoin(property.address).fetchJoin()
         .leftJoin(property.thumbnailImageUrl).fetchJoin()
         .where(finalBuilder)
